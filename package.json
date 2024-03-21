@@ -3,8 +3,12 @@
   "version": "1.0.0",
   "description": "This is the backend of aalas",
   "main": "index.js",
+  "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "rimraf dist && npx tsc",
+    "prestart":"npm run build",
+    "start": "node dist/index.js",
+    "dev": "tsc -w & nodemon dist/index.js"
   },
   "keywords": [
     "aalas",
@@ -12,5 +16,11 @@
     "typescript"
   ],
   "author": "Yuvraj Singh",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^20.11.30",
+    "nodemon": "^3.1.0",
+    "rimraf": "^5.0.5",
+    "typescript": "^5.4.3"
+  }
 }
