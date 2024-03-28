@@ -9,7 +9,7 @@ const asyncHandler = (requestHandler:RequestHandler) => (req:Request,res:Respons
 
 // method 2
 
-// const asyncHandler2 = (requestHandler) = async (req,res,next) => { 
+// const asyncHandler = (requestHandler) = async (req,res,next) => { 
 //     try {
 //         await requestHandler(req,res,next)
 //     } catch (error) {
