@@ -33,7 +33,10 @@ export const verifyJWT = asyncHandler(
       if (!user) {
         throw new ApiError(401, "Invalid Access Token");
       }
-
+      else if(user.status !== 1){
+        throw new ApiError(401, "User not allowed");
+      }
+      
       req.user = user;
       next();
     } catch (error:any) {
