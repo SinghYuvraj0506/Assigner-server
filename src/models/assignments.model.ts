@@ -1,6 +1,20 @@
 import mongoose, { Schema } from "mongoose";
 import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2"
 
+
+interface AssignmentDocument extends mongoose.Document{
+    owner:string,
+    name:string,
+    instructions:string,
+    file:string[],
+    completionTime:Date,
+    status: 0 | 1;
+    amount:number,
+    createdAt: Date;
+    updatedAt: Date;
+}
+
+
 const assignmentSchema = new Schema(
     {
         owner:{
@@ -8,14 +22,18 @@ const assignmentSchema = new Schema(
             ref:"User",
             required:true       
         },
+        name:{
+            type:"String",
+            required:true
+        },
         instructions:{
             type:String,
             required:true,
         },
-        file:{
+        file:[{
             type:mongoose.Types.ObjectId,        // upload file url -----------------
             ref:"file_upload"   
-        },
+        }],
         completionTime: {
             type: Date,
             required: true,
@@ -30,6 +48,9 @@ const assignmentSchema = new Schema(
             type:Number,
             enum:{values:[0,1,2],message:"Invalid Status Value!!!"},        // 0 for deleted/inactive and 1 for active,2 for done
             default:1
+        },
+        amount:{
+            type:Number
         }
     },{
         timestamps:true
@@ -39,4 +60,4 @@ const assignmentSchema = new Schema(
 
 assignmentSchema.plugin(mongooseAggregatePaginate)
 
-export const Assignments = mongoose.model("Assignment",assignmentSchema)
+export const Assignments = mongoose.model<AssignmentDocument>("Assignment",assignmentSchema)

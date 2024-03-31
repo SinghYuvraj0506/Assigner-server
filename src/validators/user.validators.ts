@@ -5,6 +5,20 @@ export function validateEmail(email: string): boolean {
   return emailRegex.test(email);
 }
 
+//  date validator ------------------------
+export function isValidDate(dateString:string) {
+  // Check if the input is a string
+  if (typeof dateString !== 'string') {
+      return false;
+  }
+
+  // Try parsing the input string as a date
+  const date = new Date(dateString);
+
+  // Check if the parsed date is valid
+  // JavaScript Date object handles invalid dates by setting it to NaN
+  return !isNaN(date.getTime());
+}
 
 // empty fields validators ------------------
 export function checkEmptyValues(data: string[]): boolean {
