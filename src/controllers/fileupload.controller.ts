@@ -33,6 +33,7 @@ export const uploadFile = asyncHandler(
         // saving in db
         const savedFile = await FileUpload.create({
           fileName: file?.originalname,
+          publicId:uploadResponse?.public_id,
           fileUrl:uploadResponse?.secure_url,
           fileType:file?.mimetype,
           usage:req.body.usage,

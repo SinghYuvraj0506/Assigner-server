@@ -1,12 +1,11 @@
-import mongoose, { Schema } from "mongoose";
+import mongoose, { ObjectId, Schema } from "mongoose";
 import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2"
 
-
-interface AssignmentDocument extends mongoose.Document{
-    owner:string,
+interface AssignmentDocument extends mongoose.Document {
+    owner:ObjectId,
     name:string,
     instructions:string,
-    file:string[],
+    file:ObjectId[],
     completionTime:Date,
     status: 0 | 1;
     amount:number,
@@ -15,7 +14,7 @@ interface AssignmentDocument extends mongoose.Document{
 }
 
 
-const assignmentSchema = new Schema(
+const assignmentSchema = new Schema<AssignmentDocument>(
     {
         owner:{
             type:mongoose.Types.ObjectId,

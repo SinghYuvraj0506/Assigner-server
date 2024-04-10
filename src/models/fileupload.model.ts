@@ -1,16 +1,9 @@
 import mongoose, { Schema } from "mongoose";
-
-const fileTypeEnum = [
-  "image/jpeg",
-  "image/jpg",
-  "image/png",
-  "application/pdf",
-];
-
-const usageEnum = ["assignments"];
+import { fileTypeEnum, usageEnum } from "../constants.js";
 
 interface fileUploadDocument extends mongoose.Document {
   fileUrl: string;
+  publicId:string;
   fileName: string;
   fileType: "image/jpeg" | "image/jpg" | "image/png" | "application/pdf";
   usage: "assignments";
@@ -22,6 +15,10 @@ interface fileUploadDocument extends mongoose.Document {
 const fileUploadSchema = new Schema(
   {
     fileUrl: {
+      type: String, // upload file url -----------------
+      required: true,
+    },
+    publicId: {
       type: String, // upload file url -----------------
       required: true,
     },

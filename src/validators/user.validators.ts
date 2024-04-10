@@ -1,36 +1,44 @@
-//  email validator ------------------------
-export function validateEmail(email: string): boolean {
-  // Regular expression for validating email addresses
-  const emailRegex: RegExp = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  return emailRegex.test(email);
+import {body} from "express-validator"
+import { AvailableLoginMethods } from "../constants.js";
+
+export const registerUserValidator = () => {
+  return [
+    body("email")
+      .trim()
+      .notEmpty()
+      .withMessage("Email is required")
+      .isEmail()
+      .withMessage("Email is invalid"),
+    body("fullName")
+      .trim()
+      .notEmpty()
+      .withMessage("Full Name is required"),
+    body("password")
+      .optional()
+      .notEmpty()
+      .withMessage("Password is required"),
+    body("signInFrom")
+        .isIn(AvailableLoginMethods)
+        .withMessage("Invalid Login Method")
+  ];
 }
 
-//  date validator ------------------------
-export function isValidDate(dateString:string) {
-  // Check if the input is a string
-  if (typeof dateString !== 'string') {
-      return false;
-  }
 
-  // Try parsing the input string as a date
-  const date = new Date(dateString);
-
-  // Check if the parsed date is valid
-  // JavaScript Date object handles invalid dates by setting it to NaN
-  return !isNaN(date.getTime());
+export const loginUserValidator = () =>{
+  return [
+    body("email")
+      .trim()
+      .notEmpty()
+      .withMessage("Email is required")
+      .isEmail()
+      .withMessage("Email is invalid"),
+    body("password")
+      .optional()
+      .notEmpty()
+      .withMessage("Password is required"),
+    body("signInFrom")
+        .isIn(AvailableLoginMethods)
+        .withMessage("Invalid Login Method")
+  ];
 }
 
-// empty fields validators ------------------
-export function checkEmptyValues(data: string[]): boolean {
-  return data?.some((field) => {
-    return !field || field?.trim() === "";
-  });
-}
-
-// check for values is within an enum
-export function isValidValue(value: string | number, checkData: (string | number)[]): boolean {
-    if (value !== undefined && value !== null) {
-        return checkData.includes(value);
-    }
-    return false;
-}

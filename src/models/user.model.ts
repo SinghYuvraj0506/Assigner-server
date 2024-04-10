@@ -1,13 +1,15 @@
 import mongoose, { Schema } from "mongoose";
 import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
+import jwt, { Secret } from "jsonwebtoken";
+import { AvailableLoginMethods } from "../constants.js";
+
 
 export interface UserDocument extends mongoose.Document {
   fullName: string;
   email: string;
   phone?: string;
   password?: string;
-  signInFrom: "google" | "email";
+  signInFrom: string;
   institute?: string;
   refreshToken: string;
   status: 0 | 1;
@@ -18,20 +20,29 @@ export interface UserDocument extends mongoose.Document {
   generateRefreshToken():string
 }
 
-const userSchema = new Schema(
+const userSchema = new Schema<UserDocument>(
   {
     fullName: {
       type: String,
-      required: true,
+      required: [true,"Please Enter your fullname"],
       trim: true,
     },
     email: {
       type: String,
-      required: true,
+      required: [true,"Please Enter your email"],
       unique: true,
       lowercase: true,
       trim: true,
       immutable: true,
+      validate: {
+        validator: function (value: string) {
+          // Custom email validation logic
+          const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+          return emailRegex.test(value);
+        },
+        message: (props: { value: string }) =>
+          `${props?.value} is not a valid email!`,
+      },
     },
     phone: {
       type: String,
@@ -50,8 +61,8 @@ const userSchema = new Schema(
     },
     signInFrom: {
       type: String,
-      enum: { values: ["google", "email"], message: "Invalid Signin Method!!" },
-      required: true,
+      enum:AvailableLoginMethods,
+      required: [true,"Please select the login method"],
     },
     institute: {
       type: mongoose.Types.ObjectId,
@@ -72,12 +83,11 @@ const userSchema = new Schema(
 );
 
 // mongoose middlewares & methods  ----------------------------------------------
-userSchema.pre("save", async function (next) {
-  let user = this as UserDocument
+userSchema.pre<UserDocument>("save", async function (next) {
 
-  if (!user.isModified("password")) return next();
-  else if (user.password) {
-    user.password = await bcrypt.hash(user.password, 10);
+  if (!this.isModified("password")) return next();
+  else if (this.password) {
+    this.password = await bcrypt.hash(this.password, 10);
     next();
   }
 });
@@ -99,7 +109,7 @@ userSchema.methods.generateAccessToken = function () {
       status: user.status,
       fullName: user.fullName,
     },
-    process.env.ACCESS_TOKEN_SECRET ?? "",
+    process.env.ACCESS_TOKEN_SECRET as Secret,
     {
       expiresIn: process.env.ACCESS_TOKEN_EXPIRY,
     }
@@ -113,7 +123,7 @@ userSchema.methods.generateRefreshToken = function () {
     {
       id: user._id
     },
-    process.env.REFRESH_TOKEN_SECRET ?? "",
+    process.env.REFRESH_TOKEN_SECRET as Secret,
     {
       expiresIn: process.env.REFRESH_TOKEN_EXPIRY,
     }

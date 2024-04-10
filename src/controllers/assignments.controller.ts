@@ -1,29 +1,12 @@
 import { Request, Response } from "express";
 import asyncHandler from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
-import {
-  checkEmptyValues,
-  isValidDate,
-} from "../validators/user.validators.js";
 import { Assignments } from "../models/assignments.model.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 
 export const createAssignment = asyncHandler(
   async (req: Request | any, res: Response) => {
     const { name, instructions, completionTime, fileIdArray } = req.body;
-
-    // validations ------------------
-    if (checkEmptyValues([name, instructions, completionTime])) {
-      throw new ApiError(400, "All fields are required");
-    }
-
-    if (!fileIdArray || fileIdArray?.length === 0) {
-      throw new ApiError(400, "Files are required");
-    }
-
-    if (!isValidDate(completionTime)) {
-      throw new ApiError(400, "Invalid Completion Date");
-    }
 
     const assignment = await Assignments.create({
       name,
@@ -41,15 +24,72 @@ export const createAssignment = asyncHandler(
   }
 );
 
+export const updateAssignment = asyncHandler(
+  async (req: Request | any, res: Response) => {
+
+    const { name, instructions, completionTime, fileIdArray , assignmentId } = req.body
+
+    let assignment = await Assignments.findById(assignmentId)
+
+    if(!assignment){
+      throw new ApiError(400,"Invalid assignment Id!!")
+    }
+
+    assignment = await Assignments.findByIdAndUpdate(
+      assignmentId,
+      {
+        $set:{
+          name,
+          instructions,
+          completionTime,
+          file: fileIdArray,
+        }
+      },{
+        new:true
+      }
+    )
+
+    return res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        assignment,
+        "Assignment Updated Successfully"
+      )
+    )
+
+  }
+)
+
 export const getAllAssignments = asyncHandler(
   async (req: Request | any, res: Response) => {
+    const {
+      page = 1,
+      limit = 2,
+      query = "",
+      status,
+      sortBy = "createdAt",
+      sortType = "desc",
+    } = req.query;
+
+
+    // filter params ---------------------------------------
+    let sortParam: {
+      [key: string]: 1 | -1;
+    } = {};
+    sortParam[sortBy] = sortType === 'asc' ? 1 : -1;
+
+    let statusParam = status ? parseInt(status) : {$ne:0}
+
     const assignments = await Assignments.aggregate([
       {
         $match: {
           owner: req.user._id,
-          status: {
-            $ne: 0,
-          },
+          status:statusParam,
+          name: {
+            $regex: new RegExp(`.*${query}.*`, "i")
+          }
         },
       },
       {
@@ -61,14 +101,16 @@ export const getAllAssignments = asyncHandler(
           localField: "file",
           foreignField: "_id",
           as: "file",
-          pipeline:[{
-            $project:{
-              fileUrl:1,
-              fileName:1,
-              fileType:1,
-              status:1
-            }
-          }]
+          pipeline: [
+            {
+              $project: {
+                fileUrl: 1,
+                fileName: 1,
+                fileType: 1,
+                status: 1,
+              },
+            },
+          ],
         },
       },
       {
@@ -98,16 +140,16 @@ export const getAllAssignments = asyncHandler(
           completionTime: 1,
           createdAt: 1,
           status: 1,
-          files:1,
-          _id:1,
+          files: 1,
+          _id: 1,
         },
       },
-    ]);
+    ]).sort(sortParam).skip((parseInt(page)-1)*parseInt(limit)).limit(parseInt(limit))
 
     return res
       .status(200)
       .json(
-        new ApiResponse(200, assignments, "Assignment fetched succesfully")
+        new ApiResponse(200, {data:assignments,page,limit,count:assignments?.length}, "Assignment fetched succesfully")
       );
   }
 );

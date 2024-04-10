@@ -3,13 +3,12 @@ import asyncHandler from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { User } from "../models/user.model.js";
-import {
-  checkEmptyValues,
-  isValidValue,
-  validateEmail,
-} from "../validators/user.validators.js";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import { cookieOption } from "../constants.js";
+
+interface IRegistrationBody {
+  fullName:string, email:string, password?:string, signInFrom:string
+}
 
 // genrate tokens -------------
 const generateUserAccessAndRefreshToken = async (userId: string) => {
@@ -33,16 +32,7 @@ const generateUserAccessAndRefreshToken = async (userId: string) => {
 
 export const registerUser = asyncHandler(
   async (req: Request, res: Response) => {
-    const { fullName, email, password, signInFrom } = req.body;
-
-    //  validations -----------------------
-    if (checkEmptyValues([fullName, email, password, signInFrom])) {
-      throw new ApiError(400, "All fields are required");
-    } else if (!validateEmail(email)) {
-      throw new ApiError(400, "Invalid email address");
-    } else if (!isValidValue(signInFrom, ["google", "email"])) {
-      throw new ApiError(400, "Invalid register method");
-    }
+    const { fullName, email, password, signInFrom }:IRegistrationBody = req.body;
 
     const existingUser = await User.findOne({ email });
 
@@ -78,15 +68,6 @@ export const registerUser = asyncHandler(
 
 export const loginUser = asyncHandler(async (req: Request, res: Response) => {
   const { email, password, signInFrom } = req.body;
-
-  //  validations -----------------------
-  if (checkEmptyValues([email, signInFrom])) {
-    throw new ApiError(400, "All fields are required");
-  } else if (!validateEmail(email)) {
-    throw new ApiError(400, "Invalid email address");
-  } else if (!isValidValue(signInFrom, ["google", "email"])) {
-    throw new ApiError(400, "Invalid login method");
-  }
 
   const user = await User.findOne({ email });
 
@@ -131,8 +112,8 @@ export const logoutUser = asyncHandler(
     await User.findByIdAndUpdate(
       req.user.id,
       {
-        $set: {
-          refreshToken: undefined,
+        $unset: {
+          refreshToken: 1
         },
       },
       {
