@@ -14,12 +14,40 @@ export const registerUserValidator = () => {
       .notEmpty()
       .withMessage("Full Name is required"),
     body("password")
-      .optional()
       .notEmpty()
-      .withMessage("Password is required"),
+      .withMessage("Password is required")
+  ];
+}
+
+export const socialAuthRegisterUserValidator = () => {
+  return [
+    body("email")
+      .trim()
+      .notEmpty()
+      .withMessage("Email is required")
+      .isEmail()
+      .withMessage("Email is invalid"),
+    body("fullName")
+      .trim()
+      .notEmpty()
+      .withMessage("Full Name is required"),
     body("signInFrom")
         .isIn(AvailableLoginMethods)
         .withMessage("Invalid Login Method")
+  ];
+}
+
+export const validateUserValidator = () => {
+  return [
+    body("token")
+      .notEmpty()
+      .withMessage("Token is required")
+      .isJWT()
+      .withMessage("Token is Invalid"),
+    body("code")
+      .trim()
+      .notEmpty()
+      .withMessage("Activation Code is required")
   ];
 }
 

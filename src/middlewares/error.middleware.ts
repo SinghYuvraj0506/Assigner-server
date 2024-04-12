@@ -24,7 +24,7 @@ export const ErrorMiddleware = (err:any,req:Request,res:Response,next:NextFuncti
     }
 
     // token expire Error ---------
-    else if(err?.name === "TokenExpireError"){
+    else if(err?.name === "TokenExpiredError"){
         const message = `Token Expired, Try Again!!!!!`
         err = new ApiError(400,message)
     }

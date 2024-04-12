@@ -3,33 +3,33 @@ import bcrypt from "bcrypt";
 import jwt, { Secret } from "jsonwebtoken";
 import { AvailableLoginMethods } from "../constants.js";
 
-
 export interface UserDocument extends mongoose.Document {
   fullName: string;
   email: string;
   phone?: string;
   password?: string;
   signInFrom: string;
+  isVerified: boolean;
   institute?: string;
   refreshToken: string;
   status: 0 | 1;
-  createdAt:Date;
-  updatedAt:Date;
-  isPasswordCorrect(password:string):Promise<boolean>
-  generateAccessToken():string
-  generateRefreshToken():string
+  createdAt: Date;
+  updatedAt: Date;
+  isPasswordCorrect(password: string): Promise<boolean>;
+  generateAccessToken(): string;
+  generateRefreshToken(): string;
 }
 
-const userSchema = new Schema<UserDocument>(
+const userSchema = new Schema(
   {
     fullName: {
       type: String,
-      required: [true,"Please Enter your fullname"],
+      required: [true, "Please Enter your fullname"],
       trim: true,
     },
     email: {
       type: String,
-      required: [true,"Please Enter your email"],
+      required: [true, "Please Enter your email"],
       unique: true,
       lowercase: true,
       trim: true,
@@ -59,10 +59,14 @@ const userSchema = new Schema<UserDocument>(
     password: {
       type: String,
     },
+    isVerified: {
+      type: Boolean,
+      default: false,
+    },
     signInFrom: {
       type: String,
-      enum:AvailableLoginMethods,
-      required: [true,"Please select the login method"],
+      enum: AvailableLoginMethods,
+      required: [true, "Please select the login method"],
     },
     institute: {
       type: mongoose.Types.ObjectId,
@@ -84,7 +88,6 @@ const userSchema = new Schema<UserDocument>(
 
 // mongoose middlewares & methods  ----------------------------------------------
 userSchema.pre<UserDocument>("save", async function (next) {
-
   if (!this.isModified("password")) return next();
   else if (this.password) {
     this.password = await bcrypt.hash(this.password, 10);
@@ -93,14 +96,14 @@ userSchema.pre<UserDocument>("save", async function (next) {
 });
 
 userSchema.methods.isPasswordCorrect = async function (password: string) {
-  let user = this as UserDocument
-  if(user.password){
+  let user = this as UserDocument;
+  if (user.password) {
     return await bcrypt.compare(password, user.password);
   }
 };
 
 userSchema.methods.generateAccessToken = function () {
-  let user = this as UserDocument
+  let user = this as UserDocument;
 
   return jwt.sign(
     {
@@ -117,11 +120,11 @@ userSchema.methods.generateAccessToken = function () {
 };
 
 userSchema.methods.generateRefreshToken = function () {
-  let user = this as UserDocument
+  let user = this as UserDocument;
 
   return jwt.sign(
     {
-      id: user._id
+      id: user._id,
     },
     process.env.REFRESH_TOKEN_SECRET as Secret,
     {
@@ -129,5 +132,6 @@ userSchema.methods.generateRefreshToken = function () {
     }
   );
 };
+
 
 export const User = mongoose.model<UserDocument>("User", userSchema);

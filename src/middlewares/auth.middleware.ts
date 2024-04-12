@@ -1,11 +1,11 @@
-import { Request, Response, NextFunction } from "express";
+import { Request, NextFunction, Response } from "express";
 import asyncHandler from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
-import jwt, { JwtPayload } from "jsonwebtoken";
+import jwt, { Secret } from "jsonwebtoken";
 import { User } from "../models/user.model.js";
 
 export const verifyJWT = asyncHandler(
-  async (req: Request | any, _ , next: NextFunction) => {
+  async (req: Request | any, _, next: NextFunction) => {
     try {
       const accessToken =
         req.cookies?.accessToken ||
@@ -15,32 +15,45 @@ export const verifyJWT = asyncHandler(
         throw new ApiError(401, "Unauthorized Access!!!");
       }
 
-      let decodedInfo: JwtPayload | string;
-      if (process.env.ACCESS_TOKEN_SECRET) {
-        decodedInfo = jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET);
-      } else {
-        throw new ApiError(401, "Something went wrong in authorizing");
-      }
+      let decodedInfo = jwt.verify(
+        accessToken,
+        process.env.ACCESS_TOKEN_SECRET as Secret
+      );
 
       let user;
 
-      if(typeof decodedInfo !== "string"){
+      if (typeof decodedInfo !== "string") {
         user = await User.findById(decodedInfo?.id).select(
-          "-password -refreshToken"
+          "-password -refreshToken -__v -createdAt -updatedAt"
         );
       }
 
       if (!user) {
         throw new ApiError(401, "Invalid Access Token");
-      }
-      else if(user.status !== 1){
+      } else if (user.status !== 1) {
         throw new ApiError(401, "User not allowed");
       }
-      
+
       req.user = user;
       next();
-    } catch (error:any) {
+    } catch (error: any) {
       throw new ApiError(401, error?.message || "Invalid Access Token");
     }
+  }
+);
+
+export const ensureGuest = asyncHandler(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const accessToken =
+      req.cookies?.accessToken ||
+      req.header("Authorization")?.replace("Bearer ", "");
+
+    if (!accessToken) {
+      // User is not authenticated, proceed to next middleware
+      return next();
+    }
+
+    // User is authenticated, redirect to another route (e.g., home page)
+    res.redirect(process.env.CLIENT_URL as string);
   }
 );
