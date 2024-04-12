@@ -19,6 +19,12 @@ export const registerUser = asyncHandler(
   async (req: Request, res: Response) => {
     const { fullName, email, password }: IRegistrationBody = req.body;
 
+    const existingUser = await User.findOne({ email });
+
+    if (existingUser) {
+      throw new ApiError(409, "User already exists");
+    }
+    
     const activationCode = Math.floor(Math.random() * 900000 + 100000).toString();
 
     const token = jwt.sign(
@@ -75,7 +81,7 @@ export const validateUser = asyncHandler(
     const existingUser = await User.findOne({ email });
 
     if (existingUser) {
-      throw new ApiError(409, "User already existed");
+      throw new ApiError(409, "User already exists");
     }
 
     const user = await User.create({
@@ -182,7 +188,7 @@ export const loginUser = asyncHandler(async (req: Request, res: Response) => {
   );
 
   const loggedUser = await User.findById(user._id).select(
-    "-password -refreshToken -__v"
+    "-password -refreshToken -__v -createdAt -updatedAt"
   );
 
   return res
