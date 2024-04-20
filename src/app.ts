@@ -8,8 +8,9 @@ import session from "express-session"
 
 const app = express()
 
+
 app.use(cors(({
-    origin:["http://localhost:5173","https://assigner-client.vercel.app"],
+    origin:"https://assigner-client.vercel.app",
     credentials:true
 })))
 
