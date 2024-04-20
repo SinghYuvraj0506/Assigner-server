@@ -11,6 +11,9 @@
     "predev": "npm run build",
     "dev": "tsc -w & nodemon -r dotenv/config dist/index.js"
   },
+  "pre-commit": [
+    "build"
+],
   "keywords": [
     "aalas",
     "Javascript",
@@ -33,6 +36,7 @@
     "@types/passport": "^1.0.16",
     "@types/passport-google-oauth20": "^2.0.14",
     "nodemon": "^3.1.0",
+    "pre-commit": "^1.2.2",
     "prettier": "^3.2.5",
     "rimraf": "^5.0.5",
     "typescript": "^5.4.3"
