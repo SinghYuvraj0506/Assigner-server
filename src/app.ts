@@ -14,27 +14,28 @@ app.use(cors({
     credentials: true
 }));
 
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET as string,
+    name: "session",
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      maxAge: 20 * 24 * 60 * 60 * 1000,
+      httpOnly: true, // Set to true to prevent client-side access to cookies
+      secure: false // Set to true if serving over HTTPS
+    },
+  })
+);
+
+app.use(passport.initialize());
+app.use(passport.session());
+
+
 app.use(express.json({limit:"50mb"}))
 app.use(express.urlencoded({extended:true,limit:"16kb"}))
 app.use(express.static("public"))
 app.use(cookieParser())
-
-app.use(
-    session({
-      secret: process.env.SESSION_SECRET as string,
-      name: "session",
-      resave: false,
-      saveUninitialized: true,
-      cookie: {
-        maxAge: 20 * 24 * 60 * 60 * 1000,
-        httpOnly: true, // Set to true to prevent client-side access to cookies
-        secure: false // Set to true if serving over HTTPS
-      },
-    })
-  );
-
-app.use(passport.initialize());
-app.use(passport.session());
 
 app.get("/healthcheck", (_, res: Response) => {
     return res.send("Hello I am Aalas");
