@@ -26,7 +26,7 @@ app.use(
       resave: false,
       saveUninitialized: true,
       cookie: {
-        maxAge: 24 * 60 * 24 * 100 * 12,
+        maxAge: 20 * 24 * 60 * 60 * 1000,
         httpOnly: true, // Set to true to prevent client-side access to cookies
         secure: false // Set to true if serving over HTTPS
       },
