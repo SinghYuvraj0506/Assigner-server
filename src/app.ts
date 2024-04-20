@@ -14,24 +14,22 @@ app.use(cors({
     credentials: true
 }));
 
-app.use(express.json({ limit: "50mb" }));
-app.use(express.urlencoded({ extended: true, limit: "16kb" }));
-app.use(express.static("public"));
-app.use(cookieParser());
+app.use(express.json({limit:"50mb"}))
+app.use(express.urlencoded({extended:true,limit:"16kb"}))
+app.use(express.static("public"))
+app.use(cookieParser())
 
 app.use(
     session({
-        secret: process.env.SESSION_SECRET as string,
-        name: "session",
-        resave: false,
-        saveUninitialized: true, // Change to true to save uninitialized sessions
-        cookie: {
-            maxAge: 24 * 60 * 24 * 100 * 12,
-            httpOnly: true, // Set to true to prevent client-side access to cookies
-            secure: false // Set to true if serving over HTTPS
-        }
+      secret: process.env.SESSION_SECERT as string,
+      name: "session",
+      resave: false,
+      saveUninitialized: false,
+      cookie: {
+        maxAge: 24 * 60 * 24 * 100 * 12,
+      },
     })
-);
+  );
 
 app.use(passport.initialize());
 app.use(passport.session());
