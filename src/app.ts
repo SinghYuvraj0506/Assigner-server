@@ -21,12 +21,14 @@ app.use(cookieParser())
 
 app.use(
     session({
-      secret: process.env.SESSION_SECERT as string,
+      secret: process.env.SESSION_SECRET as string,
       name: "session",
       resave: false,
       saveUninitialized: false,
       cookie: {
         maxAge: 24 * 60 * 24 * 100 * 12,
+        httpOnly: true, // Set to true to prevent client-side access to cookies
+        secure: false // Set to true if serving over HTTPS
       },
     })
   );

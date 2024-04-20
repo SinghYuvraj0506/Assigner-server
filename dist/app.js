@@ -19,12 +19,12 @@ app.use(session({
     secret: process.env.SESSION_SECRET,
     name: "session",
     resave: false,
-    saveUninitialized: true, // Change to true to save uninitialized sessions
+    saveUninitialized: false,
     cookie: {
         maxAge: 24 * 60 * 24 * 100 * 12,
         httpOnly: true, // Set to true to prevent client-side access to cookies
         secure: false // Set to true if serving over HTTPS
-    }
+    },
 }));
 app.use(passport.initialize());
 app.use(passport.session());
