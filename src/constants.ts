@@ -1,9 +1,30 @@
+import { CookieOptions } from "express";
+
 export const DB_NAME = "aalas";
 
-export const cookieOption = {
-  httpOnly: true,
-  secure: true,
-};
+const cookieALlOptions: () => CookieOptions = () => {
+  if (process.env.NODE_ENV === "development"){
+    return {
+      httpOnly: true,
+      secure: false,
+      path: "/",
+      domain: "localhost",
+      sameSite: "lax"
+    };
+  }
+  
+  else{
+    return {
+      httpOnly: true,
+      secure: true,
+      path: "/",
+      sameSite: "none"
+    };
+  }
+}
+
+export const cookieOption = cookieALlOptions()
+
 
 export const loginMethodsEnum = {
   email: "email",
