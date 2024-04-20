@@ -24,7 +24,7 @@ app.use(
       secret: process.env.SESSION_SECRET as string,
       name: "session",
       resave: false,
-      saveUninitialized: false,
+      saveUninitialized: true,
       cookie: {
         maxAge: 24 * 60 * 24 * 100 * 12,
         httpOnly: true, // Set to true to prevent client-side access to cookies
