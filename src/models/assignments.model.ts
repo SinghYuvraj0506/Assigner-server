@@ -9,6 +9,7 @@ interface AssignmentDocument extends mongoose.Document {
     completionTime:Date,
     status: 0 | 1;
     amount:number,
+    delivery:string,
     createdAt: Date;
     updatedAt: Date;
 }
@@ -50,6 +51,10 @@ const assignmentSchema = new Schema<AssignmentDocument>(
         },
         amount:{
             type:Number
+        },
+        delivery:{
+            type:String,
+            required:true
         }
     },{
         timestamps:true

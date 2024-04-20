@@ -3,10 +3,12 @@ import asyncHandler from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { Assignments } from "../models/assignments.model.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
+import { FileUpload } from "../models/fileupload.model.js";
+import Pricing from "../models/pricing.model.js";
 
 export const createAssignment = asyncHandler(
   async (req: Request | any, res: Response) => {
-    const { name, instructions, completionTime, fileIdArray } = req.body;
+    const { name, instructions, completionTime, fileIdArray, amount, delivery } = req.body;
 
     const assignment = await Assignments.create({
       name,
@@ -14,6 +16,8 @@ export const createAssignment = asyncHandler(
       completionTime,
       file: fileIdArray,
       owner: req.user._id,
+      amount,
+      delivery
     });
 
     return res
@@ -78,6 +82,7 @@ export const getAllAssignments = asyncHandler(
     let sortParam: {
       [key: string]: 1 | -1;
     } = {};
+    
     sortParam[sortBy] = sortType === 'asc' ? 1 : -1;
 
     let statusParam = status ? parseInt(status) : {$ne:0}
@@ -131,6 +136,7 @@ export const getAllAssignments = asyncHandler(
           completionTime: { $first: "$completionTime" },
           createdAt: { $first: "$createdAt" },
           status: { $first: "$status" },
+          amount: { $first: "$amount" },
         },
       },
       {
@@ -139,6 +145,7 @@ export const getAllAssignments = asyncHandler(
           instructions: 1,
           completionTime: 1,
           createdAt: 1,
+          amount:1,
           status: 1,
           files: 1,
           _id: 1,
@@ -153,3 +160,23 @@ export const getAllAssignments = asyncHandler(
       );
   }
 );
+
+export const calculateAmount = asyncHandler(
+  async (req: Request | any, res: Response) => {
+    const {files} = req.body
+    let totalPages:number = 0;
+
+    for (let index = 0; index < files.length; index++) {
+      const element = files[index];
+      let fileData = await FileUpload.findById(element);
+      totalPages += fileData?.pageCount ?? 1
+    }
+
+    if(totalPages > 20){
+      return res.status(200).json(new ApiResponse(200,{amount:"Would be informed"},"Approx amount calculated"))
+    }
+
+    let pricing = await Pricing.findOne({"pageRange.from":{$lte:totalPages} , "pageRange.to" : {$gte:totalPages}})
+
+    return res.status(200).json(new ApiResponse(200,{amount:pricing?.amountWithoutReasearch},"Approx amount calculated"))
+  })

@@ -24,4 +24,5 @@ const InstituteSchema = new Schema(
 )
 
 
+
 export const Institutions = mongoose.model("Institute",InstituteSchema)

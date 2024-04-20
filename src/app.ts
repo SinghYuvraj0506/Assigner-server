@@ -44,17 +44,18 @@ import authRoutes from "./routes/auth.routes.js"
 import userRoutes from "./routes/user.routes.js"
 import fileRoutes from "./routes/fileupload.routes.js"
 import assignmentRoutes from "./routes/assignments.routes.js"
+import institutionRoutes from "./routes/institutions.routes.js"
 import passport from "passport";
 
 app.use("/auth",authRoutes)
 app.use("/api/v1/users",userRoutes);
 app.use("/api/v1/file",fileRoutes);
 app.use("/api/v1/assignments",assignmentRoutes);
+app.use("/api/v1/institutions",institutionRoutes);
 
 app.all("*",(req:Request,res:Response)=>{
     throw new ApiError(404,`Route ${req.originalUrl} Not Found!!!`)
 })
-
 
 app.use(ErrorMiddleware);
 

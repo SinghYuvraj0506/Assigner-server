@@ -8,11 +8,15 @@ export const createAssignmentValidator = () => {
       .trim()
       .notEmpty()
       .withMessage("Instructions are required"),
+    body("amount")
+      .optional(),
+    body("delivery")
+      .trim()
+      .notEmpty()
+      .withMessage("Delivery is required"),
     body("completionTime")
       .notEmpty()
-      .withMessage("Completion Date is required")
-      .isDate()
-      .withMessage("Invalid Completion Date"),
+      .withMessage("Completion Date is required"),
     body("fileIdArray")
       .isArray({ min: 1 })
       .withMessage("Invalid files Data Array"),
@@ -45,17 +49,15 @@ export const updateAssignmentValidator = () => {
   ];
 };
 
-export const loginUserValidator = () => {
+
+export const calculateAmountValidator = () => {
   return [
-    body("email")
-      .trim()
-      .notEmpty()
-      .withMessage("Email is required")
-      .isEmail()
-      .withMessage("Email is invalid"),
-    body("password").optional().notEmpty().withMessage("Password is required"),
-    body("signInFrom")
-      .isIn(AvailableLoginMethods)
-      .withMessage("Invalid Login Method"),
+    body("files")
+      .isArray({ min: 1 })
+      .withMessage("Invalid files Data Array"),
+    body("files.*")
+      .isMongoId()
+      .withMessage("Invalid files Data!!!"),
   ];
 };
+

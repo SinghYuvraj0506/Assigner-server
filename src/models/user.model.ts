@@ -12,6 +12,7 @@ export interface UserDocument extends mongoose.Document {
   isVerified: boolean;
   institute?: string;
   refreshToken: string;
+  location?:{},
   status: 0 | 1;
   createdAt: Date;
   updatedAt: Date;
@@ -71,6 +72,9 @@ const userSchema = new Schema(
     institute: {
       type: mongoose.Types.ObjectId,
       ref: "Institute",
+    },
+    location:{
+      type:Object
     },
     refreshToken: {
       type: String,

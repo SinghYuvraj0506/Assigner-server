@@ -7,6 +7,7 @@ import jwt, { JwtPayload, Secret } from "jsonwebtoken";
 import { cookieOption } from "../constants.js";
 import { generateUserAccessAndRefreshToken } from "../utils/jwt.js";
 import { sendMail } from "../utils/sendMail.js";
+import { Institutions } from "../models/institution.model.js";
 
 interface IRegistrationBody {
   fullName: string;
@@ -24,8 +25,10 @@ export const registerUser = asyncHandler(
     if (existingUser) {
       throw new ApiError(409, "User already exists");
     }
-    
-    const activationCode = Math.floor(Math.random() * 900000 + 100000).toString();
+
+    const activationCode = Math.floor(
+      Math.random() * 900000 + 100000
+    ).toString();
 
     const token = jwt.sign(
       {
@@ -113,7 +116,7 @@ export const validateUser = asyncHandler(
       .json(
         new ApiResponse(
           201,
-          { user: createdUser, accessToken:token },
+          { user: createdUser, accessToken: token },
           `Account Verified Successfully`
         )
       );
@@ -125,7 +128,7 @@ export const socialAuthRegister = asyncHandler(
   async (req: Request, res: Response) => {
     const { fullName, email, signInFrom }: IRegistrationBody = req.body;
 
-    let user:UserDocument = await User.findOne({ email }).select(
+    let user: UserDocument = await User.findOne({ email }).select(
       "-password -refreshToken -__v -createdAt -updatedAt"
     );
 
@@ -136,7 +139,7 @@ export const socialAuthRegister = asyncHandler(
         signInFrom,
         isVerified: true,
       });
-  
+
       if (!newUser) {
         throw new ApiError(
           500,
@@ -147,7 +150,6 @@ export const socialAuthRegister = asyncHandler(
       user = await User.findById(newUser?._id).select(
         "-password -refreshToken -__v -createdAt -updatedAt"
       );
-
     }
 
     const { accessToken, refreshToken } =
@@ -200,27 +202,35 @@ export const loginUser = asyncHandler(async (req: Request, res: Response) => {
         200,
         {
           user: loggedUser,
-          accessToken
+          accessToken,
         },
         "Logged In Successfully"
       )
     );
 });
 
-export const getUser = asyncHandler(async (req: Request | any, res: Response) => {
-  return res
-  .status(200)
-  .json(
-    new ApiResponse(
-      200,
-      {
-        accessToken:req.cookies?.accessToken,
-        user: req.user,
-      },
-      "Successfully Fetched"
-    )
-  );
-})
+export const getUser = asyncHandler(
+  async (req: Request | any, res: Response) => {
+    const user = await User.findById(req.user.id)
+      .populate({ path: "institute", select: "name _id" })
+      .select({ createdAt: 0, updatedAt: 0, __v: 0 , password:0 , refreshToken: 0 });
+
+    if (!user) {
+      throw new ApiError(400, "User not found");
+    }
+
+    return res.status(200).json(
+      new ApiResponse(
+        200,
+        {
+          accessToken: req.cookies?.accessToken,
+          user: user,
+        },
+        "Successfully Fetched"
+      )
+    );
+  }
+);
 
 export const logoutUser = asyncHandler(
   async (req: Request | any, res: Response) => {
@@ -287,15 +297,25 @@ export const refreshAccessToken = asyncHandler(
         .status(200)
         .cookie("accessToken", accessToken, cookieOption)
         .cookie("refreshToken", refreshToken, cookieOption)
-        .json(
-          new ApiResponse(
-            200,
-            {},
-            "Access Token Refreshed"
-          )
-        );
+        .json(new ApiResponse(200, {}, "Access Token Refreshed"));
     } catch (error: any) {
       throw new ApiError(401, error?.message || "Invalid refresh token!!!");
     }
+  }
+);
+
+export const updateUserProfile = asyncHandler(
+  async (req: Request | any, res: Response) => {
+
+    const {location,institute,name,phone} = req.body
+
+    const user = await User.findByIdAndUpdate(req.user.id,{
+      $set:{
+        location,institute,name,phone
+      }},{new:true})
+
+    return res
+      .status(200)
+      .json(new ApiResponse(200, user, "Profile Updated Successfully"));
   }
 );

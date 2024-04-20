@@ -8,6 +8,7 @@ interface fileUploadDocument extends mongoose.Document {
   fileType: "image/jpeg" | "image/jpg" | "image/png" | "application/pdf";
   usage: "assignments";
   status: 0 | 1;
+  pageCount?:number;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -34,6 +35,9 @@ const fileUploadSchema = new Schema(
     usage: {
       type: String,
       enum: { values: usageEnum, message: "Invalid usage value!!!" },
+    },
+    pageCount: {
+      type: Number
     },
     status: {
       type: Number,
