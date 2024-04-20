@@ -10,7 +10,7 @@ import passport from "passport";
 const app = express();
 
 app.use(cors({
-    origin: ["https://assigner-client.vercel.app", "https://localhost:5173"],
+    origin: process.env.CORS_ORIGIN,
     credentials: true
 }));
 
