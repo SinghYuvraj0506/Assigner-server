@@ -70,7 +70,7 @@ export const getAllAssignments = asyncHandler(
   async (req: Request | any, res: Response) => {
     const {
       page = 1,
-      limit = 2,
+      limit = 20,
       query = "",
       status,
       sortBy = "createdAt",
