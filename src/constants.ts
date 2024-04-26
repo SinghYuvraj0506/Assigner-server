@@ -5,19 +5,16 @@ export const DB_NAME = "aalas";
 const cookieALlOptions: () => CookieOptions = () => {
   if (process.env.NODE_ENV === "development"){
     return {
-      httpOnly: true,
-      secure: false,
-      path: "/",
-      domain: "localhost",
+      // httpOnly: true,
+      // secure: false,
       sameSite: "lax"
     };
   }
   
   else{
     return {
-      httpOnly: true,
+      // httpOnly: true,
       secure: true,
-      path: "/",
       sameSite: "none"
     };
   }
