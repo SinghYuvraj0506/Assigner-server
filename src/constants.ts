@@ -5,17 +5,19 @@ export const DB_NAME = "aalas";
 const cookieALlOptions: () => CookieOptions = () => {
   if (process.env.NODE_ENV === "development"){
     return {
-      // httpOnly: true,
-      // secure: false,
-      sameSite: "lax"
+      httpOnly: true,
+      secure: false,
+      sameSite: "lax",
+      domain:"localhost"
     };
   }
   
   else{
     return {
-      // httpOnly: true,
+      httpOnly: true,
       secure: true,
-      sameSite: "none"
+      sameSite: "none",
+      domain:"livetesting.tech"
     };
   }
 }
