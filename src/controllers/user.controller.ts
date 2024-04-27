@@ -8,6 +8,7 @@ import { cookieOption } from "../constants.js";
 import { generateUserAccessAndRefreshToken } from "../utils/jwt.js";
 import { sendMail } from "../utils/sendMail.js";
 import { Institutions } from "../models/institution.model.js";
+import informLarkBot from "../utils/informLarkBot.js";
 
 interface IRegistrationBody {
   fullName: string;
@@ -106,6 +107,18 @@ export const validateUser = asyncHandler(
       );
     }
 
+    //  informing on lark --------------------
+    informLarkBot(
+      process.env.LARK_NEW_COMER_WEBHOOK as string,
+      "Someone entered our platfrom",
+      [
+        `Name - ${fullName}`,
+        `Email - ${email}`,
+        `Signed in from - email`,
+        `Created At - ${new Date().toISOString()}`
+      ]
+    )
+
     const { accessToken, refreshToken } =
       await generateUserAccessAndRefreshToken(user._id);
 
@@ -146,6 +159,18 @@ export const socialAuthRegister = asyncHandler(
           "Something went wrong while registering the user"
         );
       }
+
+      // informing on lark ------------
+      informLarkBot(
+        process.env.LARK_NEW_COMER_WEBHOOK as string,
+        "Someone entered our platform",
+        [
+          `Name - ${fullName}`,
+          `Email - ${email}`,
+          `Signed in from - ${signInFrom}`,
+          `Created At - ${new Date().toISOString()}`
+        ]
+      )
 
       user = await User.findById(newUser?._id).select(
         "-password -refreshToken -__v -createdAt -updatedAt"

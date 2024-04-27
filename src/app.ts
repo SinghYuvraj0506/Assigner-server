@@ -6,6 +6,7 @@ import { ApiError } from "./utils/ApiError.js";
 import "./utils/auth.js";
 import session from "express-session";
 import passport from "passport";
+import informLarkBot from "./utils/informLarkBot.js";
 
 const app = express();
 
@@ -62,5 +63,7 @@ app.all("*", (req: Request, res: Response) => {
 
 // Error handling middleware
 app.use(ErrorMiddleware);
+
+
 
 export default app;

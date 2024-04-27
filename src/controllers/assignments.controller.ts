@@ -5,6 +5,7 @@ import { Assignments } from "../models/assignments.model.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { FileUpload } from "../models/fileupload.model.js";
 import Pricing from "../models/pricing.model.js";
+import informLarkBot from "../utils/informLarkBot.js";
 
 export const createAssignment = asyncHandler(
   async (req: Request | any, res: Response) => {
@@ -19,6 +20,20 @@ export const createAssignment = asyncHandler(
       amount,
       delivery
     });
+
+    //  informing on lark --------------------
+    informLarkBot(
+      process.env.LARK_NEW_ASSIGNMENT_WEBHOOK as string,
+      `New Assignment Created By ${req?.user?.fullName}`,
+      [
+        `Assigment Name - ${name}`,
+        `Delivery Date - ${new Date(completionTime).toDateString()}`,
+        `Delivery Address - ${delivery}`,
+        `Amount - ${amount}`,
+        `User Email - ${req?.user?.email}`,
+        `Created At - ${new Date().toLocaleString()}`
+      ]
+    )
 
     return res
       .status(200)
