@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import asyncHandler from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
-import { uploadOnCloudinary } from "../utils/cloudinary.js";
+import { generateSignature, uploadOnCloudinary } from "../utils/cloudinary.js";
 import { FileUpload } from "../models/fileupload.model.js";
 import fs from "fs";
 import { PdfCounter } from "page-count";
@@ -71,3 +71,18 @@ export const uploadFile = asyncHandler(
     }
   }
 );
+
+export const generateCloudinaryUploadSignature = asyncHandler(
+  async (req: Request, res: Response, next: NextFunction) =>{
+
+    const {folder} = req.body;
+
+    const data = await generateSignature(folder)
+
+    if(!data){
+      console.log("Error in generating upload signature")
+      throw new ApiError(400,"Error while uploading file")
+    }
+
+    return data;
+})

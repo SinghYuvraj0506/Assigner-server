@@ -6,7 +6,6 @@ import { ApiError } from "./utils/ApiError.js";
 import "./utils/auth.js";
 import session from "express-session";
 import passport from "passport";
-import informLarkBot from "./utils/informLarkBot.js";
 
 const app = express();
 
@@ -23,8 +22,8 @@ app.use(
     saveUninitialized: false,
     cookie: {
       maxAge: 20 * 24 * 60 * 60 * 1000,
-      // httpOnly: true, // Set to true to prevent client-side access to cookies
-      // secure: false // Set to true if serving over HTTPS
+      httpOnly: true, // Set to true to prevent client-side access to cookies
+      secure: true // Set to true if serving over HTTPS
     },
   })
 );
