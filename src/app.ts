@@ -23,7 +23,7 @@ app.use(
     cookie: {
       maxAge: 20 * 24 * 60 * 60 * 1000,
       httpOnly: true, // Set to true to prevent client-side access to cookies
-      secure: true // Set to true if serving over HTTPS
+      secure: false // Set to true if serving over HTTPS
     },
   })
 );

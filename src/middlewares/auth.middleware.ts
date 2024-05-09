@@ -48,12 +48,17 @@ export const ensureGuest = asyncHandler(
       req.cookies?.accessToken ||
       req.header("Authorization")?.replace("Bearer ", "");
 
-    if (!accessToken) {
-      // User is not authenticated, proceed to next middleware
+    try {
+      jwt.verify(
+        accessToken,
+        process.env.ACCESS_TOKEN_SECRET as Secret
+      );
+
+      // User is authenticated, redirect to another route (e.g., home page)
+      return res.redirect(process.env.CLIENT_URL as string);
+    } catch (error) {
       return next();
     }
 
-    // User is authenticated, redirect to another route (e.g., home page)
-    res.redirect(process.env.CLIENT_URL as string);
   }
 );

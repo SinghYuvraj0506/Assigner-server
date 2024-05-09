@@ -31,8 +31,6 @@ export const SuccessLoginHanlder = asyncHandler((req, res, next) => {
       signInFrom:"google"
     };
 
-    req.user = {};
-
     return res
       .status(200)
       .json(new ApiResponse(200, userData, "Recieved User Data"));
